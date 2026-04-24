@@ -4,23 +4,37 @@
 #kill all;
 
 #NOP -- Replace byron below with your character (LOWER CASE).  Extend this to player5, player6, etc. to add more characters beyond 4;
-#var player1 drax;
-#var player2 ;
-#var player3 ;
-#var player4 ;
-
+#var player1 draxmage;
+#var player2 draxknight;
+#var player3 draxjedi;
+#var player4 draxcyborg;
+#var player5 draxbard;
+#var player6 draxfremen;
+#var player7 draxmonk;
+#var player8 draxpriest;
+#var player9 draxchangeling;
 
 #NOP -- This displays the options when you open tintin;
-#echo {1: $player1};
-#echo {2: $player2};
-#echo {3: $player3};
-#echo {4: $player4};
+#echo {1: Drax (Mage)};
+#echo {2: Drax (Knight)};
+#echo {3: Drax (Jedi)};
+#echo {4: Drax (Cyborg)};
+#echo {5: Drax (Bard)};
+#echo {6: Drax (Fremen)};
+#echo {7: Drax (Monk)};
+#echo {8: Drax (Priest)};
+#echo {9: Drax (Changeling)};
 
 #NOP -- These are the macros to match 1/2/3/4 so you can press that number to select that character;
-#macro {1} {#read chars/$player1/$player1.tin;$player1;um};
-#macro {2} {#read chars/$player2/$player2.tin;$player2;um};
-#macro {3} {#read chars/$player3/$player3.tin;$player3;um};
-#macro {4} {#read chars/$player4/$player4.tin;$player4;um};
+#macro {1} {#read chars/drax/draxmage.tin;drax;#read chars/$user/password.tin;um};
+#macro {2} {#read chars/drax/draxknight.tin;drax;#read chars/$user/password.tin;um};
+#macro {3} {#read chars/drax/draxjedi.tin;drax;#read chars/$user/password.tin;um};
+#macro {4} {#read chars/drax/draxcyborg.tin;drax;#read chars/$user/password.tin;um};
+#macro {5} {#read chars/drax/draxbard.tin;drax;#read chars/$user/password.tin;um};
+#macro {6} {#read chars/drax/draxfremen.tin;drax;#read chars/$user/password.tin;um};
+#macro {7} {#read chars/drax/draxmonk.tin;drax;#read chars/$user/password.tin;um};
+#macro {8} {#read chars/drax/draxpriest.tin;drax;#read chars/$user/password.tin;um};
+#macro {9} {#read chars/drax/draxchangeling.tin;drax;#read chars/$user/password.tin;um};
 
 #NOP -- When you disconnect, these options will again display to log back in;
 #event {SESSION DEACTIVATED} {
@@ -28,6 +42,12 @@
     #echo {2: $player2};
     #echo {3: $player3};
     #echo {4: $player4};
+    #echo {5: $player5};
+    #echo {6: $player6};
+    #echo {7: $player7};
+    #echo {8: $player8};
+    #echo {9: $player9};
+
 };
 
 #alias {um} {#unmacro {%d}};
