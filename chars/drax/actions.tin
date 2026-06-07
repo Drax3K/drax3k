@@ -3,5 +3,14 @@
 
 #NOP --- Player specific actions;
 
+#action {You have found %*\!} {
+    .notifyWorldDrop;
+} {2}
+
+#action {You have found Buckler of Eternia <X>!} {
+    .notifyWorldDrop;
+    get buckler;
+    keep buckler;
+} {1}
 
 #class {player_actions} {close}

@@ -1,0 +1,7 @@
+#class {guild_vars} kill
+#class {guild_vars} open
+
+#var toggle_find_familiar 1;
+#var go_fetch 0;
+
+#class {guild_vars} close

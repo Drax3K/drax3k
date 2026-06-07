@@ -7,14 +7,9 @@
         #var mage_gag 1;
         #ECHO {======== TURNING ON MAGE GAGS ========};
         #class mage_gags open;
-        #gag {You fight to maintain concentration!};
-        #gag {A %* hit for %* damage!$};
-        #gag {Tonic %* hit for %* damage!$};
+        #gag {A %* hit for %* damage.$};
         #gag {^You raise your arms and suddenly %* is moving much faster!$};
         #gag {^%* is already hasted.$};
-        #gag {assists Drax in the fight!};
-        #gag {Ogre magi calls forth a lightning bolt};
-        #gag {Ogre magi waves his hands and suddenly there are 2 more};
         #gag {You cannot cast this spell on other's summon!};
         #gag {With a wave of your hands and the intonation of powerful magics you close};
         #gag {your eyes momentarily and the sounds around you fade away.  The lights are};
@@ -23,13 +18,6 @@
         #gag {inner focus and your concentration is renewed.};
         #gag {^Phoenix emits a high-pitched shriek as she dives towards %*!$};
         #gag {^Phoenix fans her wings at %*!$};
-        #gag {You feel safer as the major globe surrounds and protects you};
-        #gag {You cast protection from evil on yourself};
-        #gag {Your skin begins to shimmer and flash, brightly spinning through all the};
-        #gag {colors of the rainbow (and then some!)};
-        #gag {Your skin begins to harden, yet it doesn't seem to affect your movements!};
-        #gag {You begin to phase in and out of the Ethereal plane!};
-        #gag {You wave your hands and a transparent shield of force surrounds you};
         #class mage_gags close;
         
     } {

@@ -1,0 +1,68 @@
+#class {guild_hpbar} {kill}
+#class {guild_hpbar} {open}
+
+#NOP -- HPBAR For Copy/Paste Is;
+#NOP confhp HP: #$CHP#/#$MHP# SP: #$CSP#/#$MSP#/#$CPC#/#$GEM# Sat: #$SAT# Cnc: #$CNC# G:#$NGM#/#$GPC# S:#$NSM#/#$SPC# G2N:#$GXN# Prots: #$PRO# MI: #$NMI# ST: #$ST# Cof: #$COF;
+#NOP set hp_pref -hp-;
+#NOP set hp_suff -hp-;
+#NOP set show_summon_status 1;
+
+#var my[mental_cognition] 99;
+
+#alias setup_3kdb_hpbar {
+    #send {confhp HP: #$CHP#/#$MHP# SP: #$CSP#/#$MSP#/#$CPC#/#$GEM# Sat: #$SAT# Cnc: #$CNC# G:#$NGM#/#$GPC# S:#$NSM#/#$SPC# G2N:#$GXN# Prots: #$PRO# MI: #$NMI# ST: #$ST# Cof: #$COF};
+    #send {set hp_pref -hp-};
+    #send {set hp_suff -hp-};
+    #send {set show_summon_status 1};
+    #send {set bspam 0};
+};
+
+#act {^-hp-HP: %d\/%d SP: %d\/%d/%d\%\/%d\% Sat: %d\% Cnc: %d\% G:%d\/%d\% S:%d\/%d\% G2N:%* Prots: %* MI: %d ST: %* Cof: %*} {
+    #if $gags[hpbar] {#line gag};
+    #var hpbar_mc %5;
+    #var hpbar_gem %6;
+    #NOP -- Add a space to the beginning and end of the protections for matching purposes;
+    #var hpbar_prots { %14 };
+    #regex {%17} {None} {#var corpses[coffin] 0};
+    #regex {%17} {%d/%d} {#var corpses[coffin] &1};
+    #if {!$my[gxp][g2n][last_round]} {#format my[gxp][g2n][last_round] {%d} {%13}};
+
+    #format my[gxp][g2n][current] {%d} {%13};
+
+    #REGEX {$hpbar_prots}	{ SS }		{#VAR {my[prots][SS]} {1}}	{#VAR {my[prots][SS]} {0}};
+    #REGEX {$hpbar_prots}	{ PA }		{#VAR {my[prots][PA]} {1}}	{#VAR {my[prots][PA]} {0}};
+    #REGEX {$hpbar_prots}	{{PS |PS! }}	{#VAR {my[prots][PS]} {1}}	{#VAR {my[prots][PS]} {0}};
+    #REGEX {$hpbar_prots}	{ A }	    {#VAR {my[prots][A]}  {1}}	{#VAR {my[prots][A]}  {0}};
+    #REGEX {$hpbar_prots}	{ B }     	{#VAR {my[prots][B]}  {1}}	{#VAR {my[prots][B]}  {0}};
+    #REGEX {$hpbar_prots}	{ MB }  	{#VAR {my[prots][MB]} {1}}	{#VAR {my[prots][MB]} {0}};
+    #REGEX {$hpbar_prots}	{ S }		{#VAR {my[prots][S]} {1}}	{#VAR {my[prots][S]} {0}};
+    #REGEX {$hpbar_prots}	{ MS }		{#VAR {my[prots][MS]} {1}}	{#VAR {my[prots][MS]} {0}};
+    #REGEX {$hpbar_prots}	{{M |M! }}	{#VAR {my[prots][M]}  {1}}	{#VAR {my[prots][M]}  {0}};
+    #REGEX {$hpbar_prots}	{ RS }		{#VAR {my[prots][RS]} {1}}	{#VAR {my[prots][RS]} {0}};
+    #REGEX {$hpbar_prots}	{ MG }		{#VAR {my[prots][MG]} {1}}	{#VAR {my[prots][MG]} {0}};
+    #REGEX {$hpbar_prots}	{ mg }		{#VAR {my[prots][mg]} {1}}	{#VAR {my[prots][mg]} {0}};
+    #REGEX {$hpbar_prots}	{ PG }		{#VAR {my[prots][PG]} {1}}	{#VAR {my[prots][PG]} {0}};
+    #REGEX {$hpbar_prots}	{ PE }		{#VAR {my[prots][PE]} {1}}	{#VAR {my[prots][PE]} {0}};
+    #REGEX {$hpbar_prots}	{ GS }		{#VAR {my[prots][GS]} {1}}	{#VAR {my[prots][GS]} {0}};
+    #REGEX {$hpbar_prots}	{ SB }		{#VAR {my[prots][SB]} {1}}	{#VAR {my[prots][SB]} {0}};
+    
+    #if {$incombat} {
+        #math {my[gxp][last_round]} {$my[gxp][g2n][last_round] - $my[gxp][g2n][current]};
+        #math {my[gxp][total]} {$my[gxp][total] + $my[gxp][last_round]};
+        #math {my[gxp][rounds_tracked]} {$total_rounds - $my[gxp][starting_round]};
+        #math {my[gxp][average]} {$my[gxp][total] / $my[gxp][rounds_tracked]};
+        #math {my[gxp][average_per_hr]} {$my[gxp][average] * 30 * 60};
+        #if {$my[gxp][best] < $my[gxp][last_round]} {#var my[gxp][best] $my[gxp][last_round]};
+        #format {my[gxp][str_average_per_hr]} {%M} {$my[gxp][average_per_hr]};
+        #format {my[gxp][str_total]} {%M} {$my[gxp][total]};
+        #format {my[gxp][str_total]} {%p} {$my[gxp][str_total]};
+        #format my[gxp][str_rounds] {%g} {$my[gxp][rounds_tracked]};
+        .gxp_t30_add;
+        .gxp_time;
+    };
+
+    #format my[gxp][g2n][last_round] {%d} {%13};
+} {2};
+
+
+#class {guild_hpbar} {close}

@@ -1,0 +1,140 @@
+#class {guild_actions} {kill}
+#class {guild_actions} {open}
+
+#var ffetch_coins 1;
+#var ffetch_materials 1;
+#var my[immersion][active] 0;
+
+#NOP --- Generic actions to assist others;
+#ACTION {^%w gives you a low-five!} {#format {lower} {%l} {%1};cast giant strength $lower;cast strength on $lower} {6};
+
+#NOP --- MOB STATUS TRACKING;
+#ACTION {You wave your hands and *POOF*, %* worst nightmare steps from} {#var mob[phantasmal] 1} {1};
+#ACTION {You focus your destructive energy upon the mind of a %*} {#var mob[feeblemind] 1} {1};
+#ACTION {That creature is dumb as a post.  It'd do no good.} {#var mob[feeblemind] 1} {1};
+#ACTION {^%* seems to speed up...$} {
+    #format tmpString {%l} {%1};
+    #var mob[slow] 0;
+    checkStrategy {slow} {cast slow on $tmpString};
+} {1};
+#ACTION {^You raise your arms and suddenly %* is moving much slower!$} {#var mob[slow] 1} {1};
+#ACTION {^%* is already slowed.$} {#var mob[slow] 1} {1};
+#ACTION {^That creature cannot be affected} {#var mob[slow] 2;#var mob[edrain] 2;} {1};
+#ACTION {^You reach out to touch %* with your glowing hand and miss!$} {#var mob[edrain] 0;} {1};
+#ACTION {^You cannot drain that creature again.$} {#var mob[edrain] 1;} {1};
+#ACTION {^This spell doesn't work on the undead.$} {#var mob[edrain] 2;} {1};
+#ACTION {You scream a power word at %*!$} {
+    #line oneshot #ACTION {%* stumbles dazed and confused!$} {#var mob[pws] 1;};
+    #line oneshot #ACTION {%* is unaffected by your spell!$} {#var mob[pws] 0;};
+} {2};
+#action {They are already stunned!$} {
+    #var mob[pws] 1;
+} {2};
+
+#var atrophy_count 0;
+
+#ACTION {^You begin speaking in soft low tones, slowly uttering forth the syllables} {#var mob[atrophy] 1;#var atrophy_count 0} {1};
+#ACTION {^%* is immune to this spell.$} {#var mob[atrophy] 2;#var atrophy_count 0} {1};
+#ACTION {^The same creature cannot be affected more than once!$} {#var mob[atrophy] 1;#var atrophy_count 0} {1};
+#action {^%* resists the effects!$} {
+    #if {$atrophy_count > 3} {
+        #var mob[atrophy] 3;
+    } {
+        #math atrophy_count {$atrophy_count + 1};
+    }
+} {2};
+
+#NOP --- MAINTENANCE ACTIONS;
+#ACTION {Your deeppocket begins to fade} {#var deeppocket 0} {1};
+#ACTION {^You reinforce the magic within your deeppocket.$} {#var deeppocket 1} {1};
+#ACTION {^You already have a deeppockets spell functioning.$} {#var deeppocket 1} {1};
+#ACTION {^You feel slower as the haste wears off.$} {#var self_haste 0} {1};
+#ACTION {^Your immersion has expired.$} {#var my[immersion][active] 0;} {2};
+#action {^There is darkness as a Orb of Light goes dark.$} {#if !$idle_flag {cast light}} {2};
+
+#NOP --- MAGE ACTIONS;
+#ACTION {^You are no longer allowing your SP to be healed.} {#var ash 0} {1};
+#ACTION {^You are now allowing your SP to be healed from local} {#var ash 1} {1};
+#ACTION {^You are now allowing your SP to be healed from any source} {#var ash 2} {1};
+
+#ACTION {^You will cast spell tap every round in combat.$} {#var spelltap 1} {1};
+#ACTION {^You will not cast spell tap every round in combat.$} {#var spelltap 0} {1};
+
+#ACTION {^%* darts out of the room.$} {#var go_fetch 1} {1};
+#ACTION {^%* darts into the room.$} {
+    #NOP -- When your familiar comes back, give it 2 rounds to update your stat lines before sending it out again if necessary;
+    #delay 5 {#var go_fetch 0};
+} {1};
+
+#action {^You wave your hands and anchor yourself to the spot!$} {#var my[anchor] 1;};
+#action {^Your anchor has been dispelled!$} {#var my[anchor] 0;};
+
+#action {^You can't study in combat!$} {#var studying 0};
+#action {^You cannot study while in combat!$} {#var studying 0};
+#action {^You cease your studying.$} {#var studying 0};
+#action {^You sit down and begin to carefully go over the spells in your tome.$} {#var studying 1;};
+#action {^Having absorbed all you can, you carefully close your spellbook.$} {#var studying 0;#var hpbar_mc 100;};
+
+#action {You are now set to perform cast %* when above %d SP, should it be} {
+    #var my[casting] %1;
+} {2};
+
+#var tmpFlag 1;
+#action {You feel less awesomesauce.} {
+    #if $tmpFlag {
+        #var tmpFlag 0;
+        deslab;unwrap;cast corpse blast;
+        #delay tmpFlag {#var tmpFlag 1} 2;
+    };
+};
+
+#var golemTypes {Straw;Wood;Flesh;Clay;Stone;Rope;Iron;Crystal};
+
+#ACTION {^You throw your golem construction materials to the ground and} {
+    #if !$idle_flag {
+        say golem, ibc;
+        checkStrategy {golem_assist} {say golem, you are now in group summons/assist always/ibc};
+        checkStrategy {golem_defend} {say golem, you are now in group summons/defend always};
+    };
+} {1};
+
+
+#NOP -- If your familiar doesn't have money;
+#NOP -- move to use the my[coins] variable;
+#NOP -- Golem materials cost 1500 coins;
+#NOP -- Gem costs 2100 coins;
+
+#ACTION {^There is no reason to 'ffetch' here.$} {
+    #if {!$idle_flag && $toggle_find_familiar} {
+        #var toggle_find_familiar 0;
+        #delay 4 {cast find familiar;#var toggle_find_familiar 1}
+    };
+} {1};
+
+#action {^You don't have any basic construction materials!$} {
+    #if {!$go_fetch && $ffetch_coins && !$idle_flag && $ffetch_materials} {
+        ffetch materials;
+        #var ffetch_materials 0;
+        #delay 6 {keep materials;#var ffetch_materials 1};
+    };
+} {2};
+
+#action {^The last of your Golem Materials has been used up.$} {
+    #if {!$go_fetch && $ffetch_coins && !$idle_flag && $ffetch_materials} {
+        ffetch materials;
+        #var ffetch_materials 0;
+        #delay 6 {keep materials;#var ffetch_materials 1};
+    };
+} {2};
+
+#action {You need some basic construction materials to create a golem.} {
+    #if {!$go_fetch && $ffetch_coins && !$idle_flag && $ffetch_materials} {ffetch materials};
+} {2};
+
+#action {You fumble and drop it!} {
+    #var ffetch_materials 0;
+} {2};
+
+
+
+#class {guild_actions} {close}

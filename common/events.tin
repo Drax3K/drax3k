@@ -26,7 +26,7 @@
         #return
     };
     #math tmpHpbarTop {$hpbar[top] - 2};
-    #if {%0 < $tmpHpbarTop} {#if {%0 > $ticker[bottom]} {#buffer {up} {1}};};
+    #if {%0 < $tmpHpbarTop} {#if {%0 > $ticker[bottom]} {#buffer {up} {3}};};
 };
 
 #EVENT {SCROLLED MOUSE WHEEL DOWN}{
@@ -35,7 +35,7 @@
         #return
     };
     #math tmpHpbarTop {$hpbar[top] - 2};
-    #if {%0 < $tmpHpbarTop} {#if {%0 > $ticker[bottom]} {#buffer {down} {1}};};
+    #if {%0 < $tmpHpbarTop} {#if {%0 > $ticker[bottom]} {#buffer {down} {3}};};
 };
 
 #EVENT {SHORT-CLICKED MOUSE BUTTON ONE} {

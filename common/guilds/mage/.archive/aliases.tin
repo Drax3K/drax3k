@@ -1,71 +1,9 @@
 #class {guild_aliases} {kill}
 #class {guild_aliases} {open}
 
-#NOP --- Drax settings;
-
 #NOP --- Default GC Settings;
-#var mage[contingencies][mantle] 0;
-#var mage[contingencies][sphere] 0;
-#read common/guilds/mage/gags.tin;
-
-#alias {mage_info} {
-    #echo {<cbf>Welcome to Drax's mage setup.  Here are some tips to remind you how to play.<088>};
-    #echo {<bdc>'setup_config' - Load your settings for the guild.<088>};
-    #echo {<bdc>'setup_def' - clear your current settings, re-set them and then cast all your protections.<088>};
-    #echo {<bdc>'summon_setup' - Clear your current summons, then setup summon_config with your pre-determined settings.<088>};
-    #echo {<bdc>'summon_clear' - Clear your setting and shoo your summons.<088>};
-}
-mage_info;
-
-#NOP -- Clear Defenses;
-#alias {clear_align} {#var defs[pe] 0;#var defs[pg] 0};
-#alias {clear_prots} {#unvar defs};
-#alias {clear_def} {
-    #10 {cast remove contingency as 1};
-    #10 {cast remove greater contingency as 1};
-    clear_align;
-    clear_prots;
-};
-
-#NOP --- Setup defences
-
-#alias {setup_def} {
-    clear_def;    
-    #delay 1 {gc_shield};
-    #delay 7 {gc_ss};
-    #delay 13 {gc_mg};
-    #delay 19 {gc_ps};
-    c_armor;
-    c_blink;
-    c_pfe;
-    cast_prots;
-};
-
-#alias {summon_tanks} {cast summon config as monster summoning 6#ogre magi#2#500#70#defend#summons#tanks}
-#alias {summon_dmg} {cast summon config as monster summoning 6#wraith#2#1500#70#assist#summons#combat}
-#alias {summon_setup} {
-	summon_clear;
-	summon_tanks;
-	summon_dmg;
-	cast summon config activate;
-}
-
-#NOP -- clear and deactivate summon config, then shoo anything we have out;
-#alias {summon_clear} {
-    #5 {cast remove summon config 1};
-    cast summon config deactivate;
-	shoo;
-}
-
-#alias {cast_prots} {
-    #delay 2 {prots_armor};
-    #delay 4 {prots_ms};
-    #delay 6 {prots_MG};
-    #delay 8 {prots_ss};
-    #delay 10 {prots_mb};       
-    #delay 12 {prots_ps};
-    #delay 14 {prots_pfe};
-}
+#var mage[contingencies][mantle] 200;
+#var mage[contingencies][sphere] 799;
 
 #NOP -- GC Tracking;
 #ACTION {^You have greater contingencies set up on you as follows:} {
@@ -75,6 +13,21 @@ mage_info;
 #ACTION {^%d:You will cast %* should your} {
      #list gcList add {%2};
 } {2};
+
+
+#NOP --- Mage Summon Aliases;
+#var mscMinSps 1500;
+#var mscMinConc 50;
+#alias {msc%+1..2d %+1..2d %+1..w %+1..w} {
+    #format mscSummonSpell {%d} {%1};
+    #format mscSummonNumber {%d} {%2};
+    #format mscSummonStrategy {%l} {%3};
+    #format mscSummonGroup {%l} {%4};
+    #format mscSummonType {%l} {%5};
+    #var mscString monster summoning ${mscSummonSpell}#${mscSummonType}#${mscSummonNumber}#${mscMinSps}#${mscMinConc}#${mscSummonStrategy}#${mscSummonGroup};
+    cast summon config as $mscString;
+    cast summon config activate;
+};
 
 #alias {str_party} {
     members;
@@ -88,15 +41,15 @@ mage_info;
     };
 };
 
-#NOP --- Check if you have enough sp for extension;
+#NOP --- MAGE DEFENSE ALIASES;
+#alias {clear_align} {#var defs[pe] 0;#var defs[pg] 0};
+#alias {clear_prots} {#unvar defs};
 
 #alias {check_extension} {
     #if {$my[sp][current] > 500} {
         cast extension 3;
     }
 };
-
-#NOP --- Greater contingencies
 
 #alias gc_ss {cast greater contingency as stoneskin#cast stoneskin};
 #alias gc_mg {cast greater contingency as major globe#cast major globe};
@@ -106,8 +59,6 @@ mage_info;
 #alias gc_pfe {deplete protection from good;cast greater contingency as prot_evil#cast protection from evil;cast protection from evil};
 #alias gc_mantle {cast greater contingency as mantle#$mage[contingencies][mantle]#cast mantle};
 #alias gc_ps {cast greater contingency as prismatic sphere#$mage[contingencies][sphere]#cast prismatic sphere};
-
-#NOP --- Normal Contingencies
 
 #alias c_rs {cast contingency as stoneskin#cast rhino skin};
 #alias c_mg {cast contingency as minor globe#cast minor globe};
@@ -120,7 +71,13 @@ mage_info;
 #alias c_blink {cast contingency as blinking#cast blink}; 
 #alias c_invis {cast contingency as invisibility#cast invisibility};
 
-#NOP --- Protection spells with extension if sp high enough.
+#NOP -- clear defenses;
+#alias {clear_def} {
+    #10 {cast remove contingency as 1};
+    #10 {cast remove greater contingency as 1};
+    clear_prots;
+    clear_align
+};
 
 #alias {prots_mb} {check_extension;cast mindblank;#var defs[MB] 1;echo_prots_mb};
 #alias {prots_pa} {check_extension;cast prismatic aura;#var defs[PA] 1;echo_prots_pa};
@@ -154,6 +111,55 @@ mage_info;
 #alias {echo_prots_blink} {#echo {+++++++++++++++  BLINK                     ++++++++++++++}};
 #alias {echo_prots_armor} {#echo {+++++++++++++++  ARMOR                      ++++++++++++++}};
 #alias {echo_prots_shield} {#echo {+++++++++++++++  SHIELD                      ++++++++++++++}};
+
+#NOP -- setup summon config with golem and summons;
+#alias {ms} {
+	#switch {"%0"} {
+          #case {"golema"} {cast summon config as create golem##1#1500#70#assist#summons#always;cast summon config activate};
+          #case {"golemd"} {cast summon config as create golem##1#1500#70#defend#summons#always;cast summon config activate};
+          #case {"1a"} {cast summon config as monster summoning 1##2#1500#70#assist#summons#always;cast summon config activate};
+          #case {"1d"} {cast summon config as monster summoning 1##2#1500#70#defend#summons#always;cast summon config activate};
+          #case {"2a"} {cast summon config as monster summoning 2##2#1500#70#assist#summons#alway;cast summon config activate};
+          #case {"2d"} {cast summon config as monster summoning 2##2#1500#70#defend#summons#always;cast summon config activate};
+          #case {"3a"} {cast summon config as monster summoning 3##2#1500#70#assist#summons#always;cast summon config activate};
+          #case {"3d"} {cast summon config as monster summoning 3##2#1500#70#defend#summons#always;cast summon config activate};
+          #case {"4a"} {cast summon config as monster summoning 4##2#1500#70#assist#summons#always;cast summon config activate};
+          #case {"4d"} {cast summon config as monster summoning 4##2#1500#70#defend#summons#always;cast summon config activate};
+          #case {"5a"} {cast summon config as monster summoning 5##2#1500#70#assist#summons#always;cast summon config activate};
+          #case {"5d"} {cast summon config as monster summoning 5##2#1500#70#defend#summons#always;cast summon config activate};
+          #case {"6a"} {cast summon config as monster summoning 6##2#1500#70#assist#summons#always;cast summon config activate};
+          #case {"6d"} {cast summon config as monster summoning 6##2#1500#70#defend#summons#always;cast summon config activate};
+          #case {"7a"} {cast summon config as monster summoning 7##2#1500#70#assist#summons#always;cast summon config activate};
+          #case {"7d"} {cast summon config as monster summoning 7##2#1500#70#defend#summons#always;cast summon config activate};
+          #case {"8a"} {cast summon config as monster summoning 8##2#1500#70#assist#summons#always;cast summon config activate};
+          #case {"8d"} {cast summon config as monster summoning 8##2#1500#70#defend#summons#always;cast summon config activate};
+          #case {"9a"} {cast summon config as monster summoning 9##2#1500#70#assist#summons#always;cast summon config activate};
+          #case {"9d"} {cast summon config as monster summoning 9##2#1500#70#defend#summons#always;cast summon config activate};
+          #case {"10a"} {cast summon config as monster summoning 10##2#1500#70#assist#summons#always;cast summon config activate};
+          #case {"10d"} {cast summon config as monster summoning 10##2#1500#70#defend#summons#always;cast summon config activate};
+          #case {"11a"} {cast summon config as monster summoning 11##2#1500#70#assist#summons#always;cast summon config activate};
+          #case {"11d"} {cast summon config as monster summoning 11##2#1500#70#defend#summons#always;cast summon config activate};
+          #case {"12a"} {cast summon config as monster summoning 12##2#1500#70#assist#summons#always;cast summon config activate};
+          #case {"12d"} {cast summon config as monster summoning 12##2#1500#70#defend#summons#always;cast summon config activate};
+          #case {"13a"} {cast summon config as monster summoning 13##2#1500#70#assist#summons#always;cast summon config activate};
+          #case {"13d"} {cast summon config as monster summoning 13##2#1500#70#defend#summons#always;cast summon config activate};
+          #case {"14a"} {cast summon config as monster summoning 14##2#1500#70#assist#summons#always;cast summon config activate};
+          #case {"14d"} {cast summon config as monster summoning 14##2#1500#70#defend#summons#always;cast summon config activate};
+          #case {""}   {#echo {<efb>==========<088> <faa>NO CONFIGURATION PROVIDED<088> <efb>==========<088>}};
+          #default 	 {cast summon config as monster summoning %0;cast summon config activate};
+     };
+};
+
+#NOP -- activate summon config;
+#alias {activate_sconfig} {
+    cast summon config activate
+};
+
+#NOP -- clear and deactivate summon config;
+#alias {clear_sconfig} {
+    #5 {cast remove summon config 1};
+    cast summon config deactivate
+};
 
 #NOP -- setup perform with a single damage type spell;
 #alias {castper} {

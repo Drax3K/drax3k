@@ -1,0 +1,168 @@
+#class {guild_heartbeat} {kill}
+#class {guild_heartbeat} {open}
+
+#var studying 0;
+#var bot_toggle 0;
+#var corpse_toggle 1;
+
+#var toggle_spelltap 1;
+#var rotate_tank 1;
+
+#NOP -- saturation-stop turns off ash, saturation-corpse unwraps a corpse;
+#var monitors[saturation-corpse] 89;
+#var monitors[saturation-stop] 85;
+
+#alias {_guild_heartbeat} {
+	#var mc_threshold 90;
+    #var mc_danger 60;
+    #math sp_danger {$my[sp][max] * .25};
+    #math sp_threshold {$my[sp][max] * .90};
+    #math sp_percent {$my[sp][current] * 100 / $my[sp][max]};
+    #math hp_percent {$my[hp][current] * 100 / $my[hp][max]};
+
+	#if !$idle_flag {
+		#if $defs[MB] {#if !$my[prots][MB] {cast mindblank} {#nop}};
+		#if $defs[PA] {#if !$my[prots][PA] {cast prismatic aura} {#nop}};
+		#if $defs[PS] {#if !$my[prots][PS] {cast prismatic sphere} {#nop}};
+		#if $defs[A]  {#if !$my[prots][A]  {cast armor} {#nop}};
+		#if $defs[MG] {#if !$my[prots][MG] {cast major globe} {#nop}};
+		#if $defs[M]  {#if !$my[prots][M]  {cast mantle} {#nop}};
+		#if $defs[mg] {#if !$my[prots][mg] {cast minor globe} {#nop}};
+		#if $defs[ms] {#if !$my[prots][MS] {cast magnificent shield} {#nop}};
+		#if $defs[SS] {#if !$my[prots][SS] {cast stoneskin} {#nop}};
+		#if $defs[rs] {#if !$my[prots][RS] {cast rhino skin} {#nop}};
+		#if $defs[pe] {#if !$my[prots][PE] {cast protection from evil} {#nop}};
+		#if $defs[pg] {#if !$my[prots][PG] {cast protection from good} {#nop}};
+		#if $defs[shield] {#if !$my[prots][S] {cast shield} {#nop}};
+		#if $defs[blink] {#if !$my[prots][B] {cast blink} {#nop}};
+
+		#if !$deeppocket {#if {$my[sp][current] > 500} {cast extension 3;cast deeppockets}};
+	} {#NOP;};
+
+	#if {!$idle_flag && !$incombat && !$studying && $hpbar_mc < 99} {
+		study spellbook;
+	};
+
+    #if {!$idle_flag} {
+        checkStrategy {shoosummons} {
+            .checksummons;
+        };
+    };
+
+    #if !$idle_flag {
+        #if {$my[coins] > 2100} {#var ffetch_coins 1} {#var ffetch_coins 0};
+        #if {$my[gem] < 90 && !$go_fetch && $ffetch_coins} {
+            #var go_fetch 1;
+            ffetch gem;
+            #list stats[gem] add $total_rounds;
+        };
+
+        #NOP -- Conditions to stop bot (low sps or low mental cognition (MC));
+        #if {$hpbar_mc < $mc_danger && !$bot_toggle && $bot[active]} {
+            ptell Pausing to study spellbook.;
+            #var bot_toggle 1;
+            .pause;
+            #ticker mcBotResume {
+                #NOP -- updated hpbar doesn't come through if you're regenning out of combat;
+                hp;
+                #if {$hpbar_mc > $mc_threshold} {
+                    #var bot_toggle 0;
+                    #if {!$incombat} {..} {.unpause};
+                    #unticker mcBotResume;
+                };
+            } {2};
+        };
+
+        #if {$my[sp][current] < $sp_danger && !$bot_toggle && $bot[active] && !$my[immersion][count] && !$my[immersion][active]} {
+            #if {!$my[hm][heal] && !$my[eternal][heal]} {
+                ptell Pausing to regenerate SPs.;
+                #var bot_toggle 1;
+                .pause;
+                #ticker spBotResume {
+                    #NOP -- updated hpbar doesn't come through if you're regenning out of combat;
+                    hp;
+                    #if {$my[sp][current] > $sp_threshold || $my[immersion][active]} {
+                        #var bot_toggle 0;
+                        #if {!$incombat} {..} {.unpause};
+                        #unticker spBotResume;
+                    };
+                } {2};
+            };
+        };
+        
+        #NOP -- Logic to reduce Sat either via corpses or Explosive Release;
+        #if {$my[gp1][current] > $monitors[saturation-corpse]} {
+            #NOP -- If you don't have corpses then use ER;
+            #if {$corpses[total] == 0 && $my[super][current]} {
+                cast explosive release;
+            };
+
+            #if {$corpses[total] > 0 && $corpse_toggle} {
+                checkStrategy {super_er} {
+                    #if $my[super][current] {cast explosive release} {
+                        #var corpse_toggle 0;
+                        corpse_select;
+                        #delay 4 {cast spell tap on corpse;cast corpse blast;slab all;wrap all;#var corpse_toggle 1;i};        
+                    };
+                } {
+                    #var corpse_toggle 0;
+                    corpse_select;
+                    #delay 4 {cast spell tap on corpse;cast corpse blast;slab all;wrap all;#var corpse_toggle 1;i};    
+                };
+            };
+        };
+    };
+
+    #NOP -- Cull the unhealthy summons during immersion - we'll do this every 20 rounds;
+    #if {!$idle_flag && $my[immersion][active]} {
+        #if $summoner {
+            checkStrategy {summon_cull} {
+                #if {$my[immersion][rounds] == 70} {_summonTankSwap};
+                #if {$my[immersion][rounds] == 30} {_summonTankSwap};
+                #if {$my[immersion][rounds] == 10} {_summonTankSwap};
+            };
+        };
+    };
+
+	#NOP -- Heartbeat actions that should only be attempted once per round;
+    #if {!$idle_flag && $action_round < $mip[round]} {
+		#if {!$self_haste && $sp_percent > 30} {
+			cast haste;
+			#var self_haste 1;
+		};
+
+        #if {$my[immersion][count] && !$my[immersion][rounds] && ($my[golem][reset] > 80 || $my[sp][current] < $sp_danger)} {
+            #var my[immersion][active] 1;
+            cast mystic immersion;
+            checkStrategy {gstrength} {
+                str_party;
+                cast giant strength on $user;
+                cast strength on $user;
+            };
+            checkStrategy {no_ash} {#NOP} {#delay 180 {ash on;ash;}};
+        };
+         
+		#if {$my[sp][percent] < .9  && $ash == 0 && $my[immersion][rounds] < 1} {
+            checkStrategy {no_ash} {#NOP} {ash on;ash};
+            
+        };
+        #if {!$my[super][current] && $my[gp1][current] > $monitors[saturation-stop] && $ash > 0 && $corpses[total] == 0} {
+            checkStrategy {no_ash} {#NOP} {ash off;#var ash 0};
+        };
+
+        #NOP turn ash off if using MI;
+        #if {$my[immersion][rounds] > 0 && $ash > 0} {
+            checkStrategy {no_ash} {#NOP} {ash off};
+        };
+
+        checkStrategy {summon_tank} {
+            #if $rotate_tank {
+                #var rotate_tank 0;
+                _summonTankSwap;
+                #delay 20 {#var rotate_tank 1};
+            };
+        };
+    };
+};
+
+#class {guild_heartbeat} {close}

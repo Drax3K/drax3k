@@ -1,0 +1,11 @@
+#read common/guilds/$guild/actions.tin;
+#read common/guilds/$guild/aliases.tin;
+#read common/guilds/$guild/data.tin;
+#read common/guilds/$guild/heartbeat.tin;
+#read common/guilds/$guild/hpbar.tin;
+#read common/guilds/$guild/miphp.tin;
+#read common/guilds/$guild/summoner.tin;
+#read common/guilds/$guild/strategy.tin;
+#read common/guilds/$guild/tickers.tin;
+#read common/guilds/$guild/track_defense.tin;
+#read common/guilds/$guild/vars.tin;

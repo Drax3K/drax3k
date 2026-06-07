@@ -1,0 +1,435 @@
+#class {guild_summoner} kill
+#class {guild_summoner} open
+
+#NOP -- Alias to view summon info;
+#alias summon_types {
+	#local tmpItem {};
+	#local tmpList {};
+	#local tmpString {};
+	#NOP strategy summon_select;
+	#echo {<dbc>-+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+---+--+-<088>};
+	#echo {<dbc>-+--+-       <dfc>Summoner!<088>  <dbc>Behold your Monsters!          <dbc>-+--+-<088>};
+	#echo {<dbc>-+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+---+--+-<088>};
+	#loop 1 14 tmpItem {
+		#var tmpString <efb>       $tmpItem:;
+		#var tmpNumber 0;
+		#var tmpIter 1;
+		#var tmpBar 40;
+		#var tmpList $summon_types;
+		#list tmpList indexate ms;
+		#list tmpList filter {$tmpItem};
+		#if {&tmpList[] > 0} {
+			#foreach $tmpList[%*] item {
+				#if {"$item[key]" == "golem"} {#NOP} {
+					#math isOdd {$tmpIter % 2};
+					#if $isOdd {#var tmpColor <dfc>} {#var tmpColor <ccc>};
+					#format curLength {%L} $tmpString;
+					#if {"$item[dtype]" == ""} {
+						#var itemDesc $item[key];
+					} {
+						#var itemDesc $item[key] <eee>($item[dtype])<088>;
+					};
+					#format tmpLength {%L} $itemDesc;
+					#math tmpNumber {$tmpLength + $curLength};
+					#if {$tmpNumber > $tmpBar} {
+						#math tmpBar {$tmpBar + 40};
+						#cat tmpString {\n$tmpColor          $itemDesc<088>};
+					} {
+						#cat tmpString {$tmpColor $itemDesc<088>};
+					};
+					#math tmpIter {$tmpIter + 1};
+				};
+			};
+			#format tmpLength {%L} $tmpString;
+			#if {$tmpLength > 15} {
+				#format tmpString {%-50s} {$tmpString};
+				#draw scroll scale tile 1 1 1 1 {$tmpString};
+				#echo {<dbc>-+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+---+--+-<088>};
+			};
+		};
+	};
+	#echo {<dbc>-+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+---+--+-<088>};
+};
+
+
+#NOP -- Aliases to select your summon for Mage summon_select strategy;
+#alias summon_select {
+	#if {"%0" == "clear"} {
+		#var summon_select[ms] {};
+		#var summon_select[active] 0;
+		#var summon_select[key] {};
+		#var summon_select[name] {};
+		checkStrategy {summon_select} {strategy summon_select};
+		#format tmpString {%-50s} {<dbc>-+--+-         summon_select has been cleared.};
+		#echo {$tmpString     -+--+-<088>};
+	} {
+		#if {"%0" == "off"} {
+			#var summon_active 0;
+			checkStrategy {summon_select} {strategy summon_select};
+			#format tmpString {%-50s} {<dbc>-+--+-         summon_select has been turned off.};
+			#echo {$tmpString     -+--+-<088>};
+		} {
+			#if {"%0" == ""} {
+				#local tmpItem {};
+				#local tmpList {};
+				#local tmpString {};
+				#NOP strategy summon_select;
+				#echo {<dbc>-+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+---+--+-<088>};
+				#echo {<dbc>-+--+-       <dfc>Summoner!<088>  <dbc>Select your Monster!           <dbc>-+--+-<088>};
+				#echo {<dbc>-+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+---+--+-<088>};
+				#loop 1 14 tmpItem {
+					#var tmpString <efb>       $tmpItem:;
+					#var tmpNumber 0;
+					#var tmpIter 1;
+					#var tmpBar 40;
+					#var tmpList $summon_types;
+					#list tmpList indexate ms;
+					#list tmpList filter {$tmpItem};
+					#if {&tmpList[] > 0} {
+						#foreach $tmpList[%*] item {
+							#if {"$item[key]" == "golem"} {#NOP} {
+								#math isOdd {$tmpIter % 2};
+								#if $isOdd {#var tmpColor <dfc>} {#var tmpColor <ccc>};
+								#format curLength {%L} $tmpString;
+								#format tmpLength {%L} $item[key];
+								#math tmpNumber {$tmpLength + $curLength};
+								#if {$tmpNumber > $tmpBar} {
+									#math tmpBar {$tmpBar + 40};
+									#cat tmpString {\n$tmpColor          $item[key]<088>};
+								} {
+									#cat tmpString {$tmpColor $item[key]<088>};
+								};
+								#math tmpIter {$tmpIter + 1};
+							};
+						};
+						#format tmpLength {%L} $tmpString;
+						#if {$tmpLength > 15} {
+							#format tmpString {%-50s} {$tmpString};
+							#draw scroll scale tile 1 1 1 1 {$tmpString};
+							#echo {<dbc>-+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+---+--+-<088>};
+						};
+					};
+				};
+				#format tmpString {%-50s} {<dbc>-+--+-  <dfc>summon_select<088> <bff>monster<088> <dbc>to make your choice!};
+				#echo {$tmpString     <dbc>-+--+-<088>};
+				#if $summon_select[active] {
+					#format tmpString {%-50s} {<dbc>-+--+-  <dfc>summon_select<088> <bff>off<088> <dbc>to turn off.};
+					#echo {$tmpString     -+--+-<088>};
+					#format tmpString {%-50s} {<dbc>-+--+-  <dfc>summon_select<088> <bff>clear<088> <dbc>to clear selection.};
+					#echo {$tmpString     -+--+-<088>};
+					#format tmpString {%-50s} {<dbc>-+--+-  <bff>$summon_select[key]<088> <dbc>is currently selected.};
+					#echo {$tmpString     -+--+-<088>};
+				};
+				#echo {<dbc>-+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+---+--+-<088>};
+			} {
+				#local tmpList {};
+				#var tmpList $summon_types;
+				#list tmpList indexate key;
+				#list tmpList filter {%0};
+				#if {&tmpList[] > 0} {
+					#format tmpString {%n} {$tmpList[1][name]};
+					#var summon_select[active] 1;
+					#var summon_select[ms] $tmpList[1][ms];
+					#var summon_select[key] $tmpList[1][key];
+					#var summon_select[name] $tmpList[1][name];
+					checkStrategy {summon_select} {#NOP} {strategy summon_select};
+					#echo {<dbc>-+--+-  You have selected <dfc>$tmpString.<088>  <dbc>Go forth child! -+--+-<088>};
+				} {
+					#echo {<dbc>-+--+-  No summon named %0 found.  Please check spelling or the list again.    <dbc>-+--+-<088>};
+				};		
+			};
+		};
+	};
+};
+
+#alias _prepSummonString {
+	#unvar summon_string;
+	#var summon_string Monsters($total_summons): <088>;
+	checkStrategy {summon_haste} {#replace summon_string {(%d)} {&0 <ffa>${haste_icon}<088>}};
+	checkStrategy {summon_mf} {#replace summon_string {(%d)} {&0 ${mf_icon}<088>}};
+};
+
+#alias summon_str {
+	#foreach $my[summons][%*] item {
+		#format lowerName {%l} $item[key];
+		#loop 1 $item[count] index {
+			cast giant strength on $lowerName $index;
+		};
+	};
+	cast giant strength on $user;
+    cast giant strength on golem;
+};
+
+#alias _handleSummonString {
+	#list my[summons] clear;
+	#var my[golem][active] 0;
+
+	#loop 1 &summonList[] index {
+		#var summon_haste 0;
+		#var summon_mf 0;
+		#var summon_tanking 0;
+		#regex {$summonList[$index]} {%*:} {
+				#var tempName &1;
+				#list tempName explode { };
+				#format summon_name {%n} {$tempName[&tempName[]]};
+				#var key $summon_name;
+		};
+		#regex {$summonList[$index]} {~} {#var summon_tanking 1} {#var summon_tanking 0};
+		#regex {$summonList[$index]} {!} {#var summon_haste 1} {
+			#var summon_haste 0;
+			checkStrategy {summon_haste} {
+				#NOP -- We can't haste phantasmal killer or other illusions;
+				#if {"$key" == "Something"} {#NOP} {#var summon_renew_haste 1};
+			};
+		};
+		#regex {$summonList[$index]} {mf} {#var summon_mf 1} {
+			#var summon_mf 0;
+			checkStrategy {summon_mf} {#var summon_renew_mf 1};
+			#if {"$key" == "Something"} {
+				checkStrategy {phantasmal_mf} {cast monstrous fortitude on something};
+			};
+		};
+
+		#var found_summon 0;
+		#list my[summons] {size} {tempSize};
+		#loop 1 $tempSize item {
+			#if {"$my[summons][${item}][key]" == "$key"} {#var found_summon 1;#var itemIndex $item};
+		};
+
+		#if {$found_summon} {
+			#math summon_type_count {$my[summons][${itemIndex}][count] + 1};
+			#var my[summons][${itemIndex}][count] $summon_type_count;
+			#var my[summons][${itemIndex}][haste] $summon_haste;
+			#var my[summons][${itemIndex}][mf] $summon_mf;
+			#if $summon_tanking {#var my[summons][${itemIndex}][tanking] 1};
+		} {
+			#list my[summons] add {{{key} {$key} {name} {$summon_name} {haste} {$summon_haste} {mf} {$summon_mf} {count} {1} {tanking} {$summon_tanking}}};
+		};
+	};
+
+	#var total_summons 0;
+	#foreach $my[summons][%*] item {
+		#math total_summons {$total_summons + $item[count]};
+	};
+
+	_prepSummonString;
+
+	#var mob[phantasmal] 0;
+	
+	#foreach $my[summons][%*] item {
+		#NOP -- If phantasmal killer is in the summon list, we can update the mob status report;
+		#if {"$item[key]" == "Something"} {#var mob[phantasmal] 1};
+
+		#NOP -- Check if your golem is out;
+		#if {"$item[key]" == "Golem"} {#var my[golem][active] 1};
+
+		#unvar summonItemName;
+		#if $item[mf] {#var summonItemName <eab>};
+		#if $item[haste] {#var summonItemName <ffa>};
+		#if {$item[count] > 1} {#var tempName ($item[count]) $item[name]} {#var tempName $item[name]};
+
+		#if $item[tanking] {#cat summonItemName {${tank_icon} $tempName ${tank_icon} <088>}} {#cat summonItemName {$tempName<088>}};
+		#cat summon_string {$summonItemName, };
+	};
+
+	#NOP -- Remove the last 2 chars from summon_string, which will be ', ';
+	#format {summon_string_size} {%L} {$summon_string};
+	#math summon_string_size {$summon_string_size - 2};
+	#format {summon_string} {%.${summon_string_size}s} {$summon_string};
+};
+
+#action {  --> %*\n%a-hp-} {
+    #if $gags[hpbar] {
+		#line oneshot #gag {  --> %*};
+		#line oneshot #gag { %*-hp-};
+	};
+    #list summonList clear;
+    #format summon1 {%p} {%1};
+    #format summon2 {%p} {%2};
+    #var summonList $summon1 $summon2;
+    #list summonList explode {, };
+    _handleSummonString;
+} {1};
+
+#action {  --> %*-hp-} {
+	#if $gags[hpbar] {#line gag};
+	#list summonList clear;
+	#format summon1 {%p} {%1};
+	#var summonList $summon1;
+	#list summonList explode {, };
+	_handleSummonString;
+} {2};
+
+#alias _summonTankSwap {
+	#list summonTankList clear;
+	#var summonTankCheck 1;
+	look;
+	#delay 2 {
+		#var summonTankCheck 0;
+		#list summonTankList indexate health;
+		#list summonTankList order;
+		#list summonTankList reverse;
+		.summonLookupName $summonTankList[1][name];
+		#send {say $summonTmpName $summonTankList[1][index], defend me};
+		_summonHealthCull;
+	};
+};
+
+#alias _summonHealthCull {
+	#list summonTankList clear;
+	#var summonTankCheck 1;
+	look;
+	#delay 2 {
+		#var summonTankCheck 0;
+		#list summonTankList indexate health;
+		#list summonTankList refine {&0 < 50};
+		#foreach $summonTankList[%*] item {
+			.summonLookupName $item[name];
+			say $summonTmpName $item[index], begone;
+		};
+	};
+};
+
+#NOP -- Eventually this logic will be collapsed into the -M- action that's going to be standardized;
+
+#NOP -- Ignore your familiar for any mob checks, if you see it in the room set go_fetch to 0;
+#action {^-M-_${my[familiar]}.$} {#NOP;#var go_fetch 0} {1};
+
+#alias .summonLookupName {
+	#var tmpName %0;
+	#switch {"$tmpName"} {
+		#nop ms1;
+		#case {"A Manes (demon)"} {#var summonTmpName manes};
+		#case {"A Giant Rat"} {#var summonTmpName rat};
+		#case {"A Small Kobold"} {#var summonTmpName kobold};
+		#case {"A Mean Hobgoblin"} {#var summonTmpName hobgoblin};
+		#case {"A Goblin"} {#var summonTmpName goblin};
+		#case {"An Orc"} {#var summonTmpName orc};
+
+		#nop ms2;
+		#case {"A Lemure"} {#var summonTmpName lemure};
+		#case {"A Giant Toad"} {#var summonTmpName toad};
+		#case {"A Stirge"} {#var summonTmpName stirge};
+		#case {"A Gnoll"} {#var summonTmpName gnoll};
+		#case {"A Giant Centipede"} {#var summonTmpName centipede};
+		#case {"An Ugly Troglodyte"} {#var summonTmpName troglodyte};
+
+		#nop ms3;
+		#case {"A Huge Spider"} {#var summonTmpName spider};
+		#case {"A Giant Boring Beetle"} {#var summonTmpName beetle};
+		#case {"A Smelly Bugbear"} {#var summonTmpName bugbear};
+		#case {"A Disfigured Wererat"} {#var summonTmpName wererat};
+		#case {"A Large Spider"} {#var summonTmpName spider};
+		#case {"A Giant Weasel"} {#var summonTmpName weasel};
+		#case {"A Rotting Ghoul"} {#var summonTmpName ghoul};
+		#case {"A Giant Tick"} {#var summonTmpName tick};
+		#case {"A Large Ogre"} {#var summonTmpName ogre};
+		#case {"A Giant Lizard"} {#var summonTmpName lizard};
+
+		#nop ms4;
+		#case {"A Dark Shadow"} {#var summonTmpName shadow};
+		#case {"A Huge Owlbear"} {#var summonTmpName owlbear};
+		#case {"A Giant Constrictive Snake"} {#var summonTmpName snake};
+		#case {"A Carnivorous Ape"} {#var summonTmpName ape};
+		#case {"A Rotting Ghast"} {#var summonTmpName ghast};
+		#case {"A Disfigured Werewolf"} {#var summonTmpName werewolf};
+		#case {"A 5-headed Hydra"} {#var summonTmpName hydra};
+		#case {"A Froth-mouthed Hell Hound"} {#var summonTmpName hound};
+		#case {"A Large Ice Toad"} {#var summonTmpName ice toad};
+		#case {"A Stony Gargoyle"} {#var summonTmpName gargoyle};
+		#case {"An Enormous Poisonous Toad"} {#var summonTmpName poisonous toad};
+
+		#nop ms5;
+		#case {"A Shimmering Black Displacer Beast"} {#var summonTmpName beast};
+		#case {"A Gnarly 7-headed Hydra"} {#var summonTmpName hydra};
+		#case {"A Giant Poisonous Snake"} {#var summonTmpName poisonous snake};
+		#case {"A Disfigured Wereboar"} {#var summonTmpName wereboar};
+		#case {"A Nasty Cockatrice"} {#var summonTmpName cockatrice};
+		#case {"A Giant Spider"} {#var summonTmpName spider};
+		#case {"A Swift Leucrotta"} {#var summonTmpName leucrotta};
+		#case {"An Enormous Minotaur"} {#var summonTmpName minotaur};
+
+		#nop ms6;
+		#case {"A Disfigured Jackalwere"} {#var summonTmpName jackalwere};
+		#case {"A Shimmering Phase Spider"} {#var summonTmpName spider};
+		#case {"A Stinky-assed Otyugh"} {#var summonTmpName otyugh};
+		#case {"A Disfigured Weretiger"} {#var summonTmpName weretiger};
+		#case {"A Firey Salamander"} {#var summonTmpName salamander};
+		#case {"A Dangerous Rakshasa"} {#var summonTmpName rakshasa};
+		#case {"A Near-invisible Wraith"} {#var summonTmpName wraith};
+		#case {"A Terrifying Manticore"} {#var summonTmpName manticore};
+		#case {"A Terrible Wyvern"} {#var summonTmpName wyvern};
+		#case {"A Power Ogre Magi"} {#var summonTmpName ogre magi};
+		#case {"A Disgusting Carrion Crawler"} {#var summonTmpName crawler};
+		#case {"A Rotting Wight"} {#var summonTmpName wight};
+		#case {"An Enormous Troll"} {#var summonTmpName troll};
+		#case {"An Enormous 8-headed Hydra"} {#var summonTmpName hydra};
+
+		#nop ms7;
+		#case {"A Hu-goddamn-mongous 10-headed Hydra"} {#var summonTmpName hydra};
+		#case {"A huge Flaming Phoenix"} {#var summonTmpName phoenix};
+		#case {"A Damn Ugly Mind-flayer"} {#var summonTmpName mind-flayer};
+		#case {"A Crimson-red Fire Lizard"} {#var summonTmpName lizard};
+		#case {"A Obsidian-black Gorgon"} {#var summonTmpName gorgon};
+		#case {"A Shimmering Spectre"} {#var summonTmpName spectre};
+		#case {"A Gargantuan Roper"} {#var summonTmpName roper};
+		#case {"A 2-headed Ettin"} {#var summonTmpName ettin};
+		#case {"A Rock-encrusted Xorn"} {#var summonTmpName xorn};
+		#case {"A Fugly Night Hag"} {#var summonTmpName hag};
+		#case {"A Giant Umber Hulk"} {#var summonTmpName hulk};
+		#case {"A 3-headed Chimera"} {#var summonTmpName chimera};
+		#case {"A Giant Slug"} {#var summonTmpName slug};
+		#case {"A Rotting Mummy"} {#var summonTmpName mummy};
+		#case {"An Enormous, 8-headed Pyro-hydra"} {#var summonTmpName pyro-hydra};
+		#case {"An Enormous Fire Giant"} {#var summonTmpName fire giant};
+		#case {"An Enormous Frost Giant"} {#var summonTmpName frost giant};
+		#case {"An Enormous Stone Giant"} {#var summonTmpName stone giant};
+		#case {"An Enormous Hill Giant"} {#var summonTmpName hill giant};
+		#case {"An Enormous Neo-otyugh"} {#var summonTmpName neo-otyugh};
+
+		#nop ms8;
+		#case {"An Enormous Storm Giant"} {#var summonTmpName storm giant};
+		#case {"An Enormous Cloud Giant"} {#var summonTmpName cloud giant};
+
+		#nop ms9;
+		#case {"A Beast Owlbear"} {#var summonTmpName owlbear};
+		#case {"A Demon Hellhound"} {#var summonTmpName hellhound};
+		#case {"A Fey Dryad"} {#var summonTmpName dryad};
+
+		#nop ms10;
+		#case {"A Celestial Lion"} {#var summonTmpName lion};
+		#case {"A Shadow Panther"} {#var summonTmpName panther};
+		#case {"An Undead Wraith"} {#var summonTmpName wraith};
+
+		#nop ms11;
+		#case {"A Fey Sprite"} {#var summonTmpName sprite};
+		#case {"A Chain Devil"} {#var summonTmpName devil};
+		#case {"A celestial Hawk"} {#var summonTmpName hawk};
+		#case {"A Snarling, Blood-soaked Chupacabra"} {#var summonTmpName chupacabre};
+	};
+};
+
+#action {^%* says: I can't do this anymore, someone else take over!$} {
+	#math mob[summons_killed] {$mob[summons_killed] + 1};
+	#var summon_new_tank 1;
+};
+
+#var summons[summoned] 0;
+#action {^You wave your hands calling forth summoning magics and draw %*\n%a (100%) into the room!$} {
+	#var summonSCA 0;
+	#math summons[summoned] {$summons[summoned] + 1};
+	#format tmp1 {%p} {%1};
+	#format tmp2 {%p} {%2};
+	#var summonCalled {$tmp1 $tmp2};
+	#replace summonCalled {\n} { };
+	#format summonCalled {%l} {$summonCalled};
+	#list summonCalled {explode} { };
+	#var summonCalled $summonCalled[-1];
+} {2};
+
+#NOP -- If you get this message, the summon has been auto-grouped already since it was called with summon config;
+#NOP -- If not, then it was manually summoned and needs to be assigned to 'summons' group so casting haste/mf on the group works;
+#action {^You are creating a summon, with:} {#var summonSCA 1} {2};
+
+
+#class {guild_summoner} close
